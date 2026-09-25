@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Seasonal Snow Contract Pricer: price snow contracts on 30 winters of local storm data</title>
+<meta name="description" content="Enter a ZIP, trigger depth and your cost per push. See pushes per winter since 1996-97 from NOAA station data, a seasonal price for an 80th-percentile winter, and how many winters it would have lost money.">
+<link rel="canonical" href="https://yarosim.github.io/snow-contract-pricer/">
+<meta property="og:title" content="Seasonal Snow Contract Pricer (2026-27 Season Edition)">
+<meta property="og:description" content="Price seasonal snow contracts on 30 winters of NOAA station storm data.">
+<meta property="og:url" content="https://yarosim.github.io/snow-contract-pricer/">
+<meta property="og:type" content="website">
+<style>
+:root{--ink:#0f172a;--mut:#475569;--acc:#0b63ce;--line:#e2e8f0}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink)}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+.hero{background:linear-gradient(180deg,#0b1b33,#12325e);color:#fff;padding:64px 0 48px}
+.hero h1{font-size:40px;line-height:1.15;margin:0 0 14px;max-width:820px}.hero p{font-size:18px;color:#dbeafe;max-width:760px}
+.cta{display:inline-block;background:#f97316;color:#fff;font-weight:700;padding:14px 22px;border-radius:8px;text-decoration:none;margin:8px 10px 0 0}
+.cta.alt{background:transparent;border:2px solid #93c5fd;color:#fff}
+section{padding:48px 0;border-bottom:1px solid var(--line)}h2{font-size:28px;margin:0 0 14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:820px){.grid3,.grid2{grid-template-columns:1fr}.hero h1{font-size:30px}}
+.card{border:1px solid var(--line);border-radius:12px;padding:20px;background:#fff}
+.stat{background:#f8fafc;border-left:4px solid #f97316;padding:16px 18px;border-radius:6px;font-size:17px}
+.price{font-size:40px;font-weight:800}.small{font-size:13px;color:var(--mut)}
+iframe{width:100%;height:1250px;border:1px solid var(--line);border-radius:12px}
+details{border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:10px 0}summary{font-weight:600;cursor:pointer}
+form input{padding:12px;border:1px solid #cbd5e1;border-radius:8px;font-size:16px;width:260px;max-width:100%}
+form button{padding:12px 18px;border:0;border-radius:8px;background:var(--acc);color:#fff;font-weight:700;font-size:16px}
+footer{padding:30px 0;font-size:13px;color:var(--mut)}
+ul.check{list-style:none;padding:0}ul.check li:before{content:"✔ ";color:#15803d;font-weight:700}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <p style="font-weight:700;color:#93c5fd;margin:0 0 6px">For snow plow &amp; ice management contractors · 2026–27 pre-season</p>
+  <h1>Price seasonal snow contracts on 30 winters of real local storms, not a guess.</h1>
+  <p>Enter the property's ZIP, your trigger depth and your cost per push. You'll see how many pushes each winter since 1996-97 would have taken, a seasonal price that covers a bad winter, and how many winters that price would have lost money.</p>
+  <a class="cta" href="#pricing">Get the 2026–27 Season Pass: $39</a>
+  <a class="cta alt" href="#demo">Try the free demo</a>
+  <p class="small" style="color:#bfdbfe">Built on NOAA GHCN-Daily station records · 1,445 stations in 43 states · ZIP lookup · works offline</p>
+</div></header>
+
+<section><div class="wrap">
+  <h2>"Average snowfall" is the wrong number for a seasonal contract</h2>
+  <div class="stat">At Chicago O'Hare, storms of <b>2 inches or more</b> ranged from <b>1 per winter (2023-24)</b> to <b>13 per winter (2013-14)</b>. The median was 5.<br><span class="small">NOAA GHCN-Daily station USW00094846, 28 complete winters 1996-97 to 2025-26. A storm is consecutive days with ≥0.1" of new snow, summed.</span></div>
+  <p>A flat seasonal price built on a "normal" winter loses money in the heavy ones. Contractors on the forums price seasonal work on rules of thumb like "12 plows and 30 salts" because pulling event counts out of raw weather data takes hours. This tool does it in seconds for your trigger depth and your costs.</p>
+</div></section>
+
+<section id="demo"><div class="wrap">
+  <h2>Try it free (12 metro stations)</h2>
+  <p>Change the trigger, cost per push and risk level. Watch the price and the loss count move.</p>
+  <iframe src="demo.html" title="Seasonal Snow Contract Pricer demo" loading="lazy"></iframe>
+</div></section>
+
+<section><div class="wrap">
+  <h2>What you get</h2>
+  <div class="grid3">
+    <div class="card"><h3>Local storm history</h3><p>Storms and pushes per winter at 1", 2", 3", 4" or 6" triggers, plus re-pushes for long storms and snow days for salting. 1,445 NOAA stations; enter a ZIP to find the 5 nearest.</p></div>
+    <div class="card"><h3>Risk-based seasonal price</h3><p>Choose the winter to plan for (median, 70th, 80th, 90th percentile) and your margin. Get a seasonal and monthly price, the number of winters it would have lost money, and your worst-winter result.</p></div>
+    <div class="card"><h3>Hybrid contract builder</h3><p>A lower seasonal fee that covers the median winter, plus per-push overage. It shows how often past winters would have gone over the cap.</p></div>
+    <div class="card"><h3>Client-ready report</h3><p>Print a one-page snow-history summary to attach to your proposal, so the property manager can see why the number is what it is.</p></div>
+    <div class="card"><h3>Spreadsheet edition</h3><p>An Excel/Sheets workbook with a station-by-station summary (median, P80, P90, max storms at each trigger) and a formula pricer.</p></div>
+    <div class="card"><h3>Works offline</h3><p>One HTML file plus data. No login, no subscription, nothing to install. Open it on the laptop in your truck.</p></div>
+  </div>
+</div></section>
+
+<section id="pricing"><div class="wrap">
+  <h2>Pricing</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Season Pass 2026–27</h3><div class="price">$39</div><p class="small">One-time payment. No subscription.</p>
+      <ul class="check"><li>Offline pricer: all 1,445 stations + ZIP lookup</li><li>Spreadsheet edition</li><li>Printable client report + CSV export</li><li>Quick Start guide</li></ul>
+      <a class="cta" href="https://buy.stripe.com/14AeVd5E840Y87E47a2Ji2c" rel="noopener">Buy the Season Pass: $39</a>
+    </div>
+    <div class="card">
+      <h3>Team / Multi-market</h3><div class="price">$99</div><p class="small">One-time payment. For companies with estimators in several markets.</p>
+      <ul class="check"><li>Everything in the Season Pass</li><li>Use by up to 5 people in your company</li><li>Station summary CSV for all stations (for your own bid sheets)</li><li>Priority email support for the 2026–27 season</li></ul>
+      <a class="cta" href="https://buy.stripe.com/9B6aEXgiM0OM2Nk6fi2Ji2d" rel="noopener">Buy Team: $99</a>
+    </div>
+  </div>
+  <p style="margin-top:18px"><b>14-day no-questions refund:</b> if you want your money back for any reason, email <a href="mailto:pnsgloballlc@gmail.com">pnsgloballlc@gmail.com</a> within 14 days of purchase and you will get a full refund. No questions asked.</p>
+  <p class="small">Secure checkout by Stripe. After payment you are sent straight to your download page, and Stripe emails your receipt.</p>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Free: 12-metro storm table + pricing worksheet</h2>
+  <p>Storm counts at 1", 2" and 3" triggers (median, 80th percentile, range) for 12 snow-belt metros, plus a one-page seasonal pricing worksheet.</p>
+  <p><a class="cta" href="free-storm-table.html">View and print the free table</a></p>
+  <p class="small">No email required. Print it or save it as a PDF from your browser.</p>
+</div></section>
+
+<section><div class="wrap">
+  <h2>FAQ</h2>
+  <details><summary>Isn't NOAA weather data free?</summary><p>Yes, and this tool is built on it. What you're paying for is the processing: 30 winters of daily records turned into storm and push counts at your trigger for 1,445 stations, the percentile pricing, the loss backtest and a client-ready report, in seconds instead of hours in a spreadsheet.</p></details>
+  <details><summary>The nearest station isn't at my property. Is it still useful?</summary><p>Use it as the local baseline. The ZIP search shows the 5 nearest stations with distance and elevation, so you can pick the one with similar terrain and lake exposure. Snowfall varies locally, especially in lake-effect and mountain areas, so adjust with your own experience.</p></details>
+  <details><summary>How do you count "storms" and "pushes"?</summary><p>A storm is a run of consecutive days with at least 0.1" of new snow, summed. It counts if the total reaches your trigger. Pushes = 1 per qualifying storm, plus 1 for each "extra push" increment you set (for example, every 6" beyond the trigger). Stations measure snowfall once a day, so storm timing can split or merge events.</p></details>
+  <details><summary>Does it handle ice and freezing rain?</summary><p>No. Snowfall records don't capture ice storms, freezing rain or refreeze. Salting counts use snow days (≥0.1") as a proxy. Add ice events from your own experience.</p></details>
+  <details><summary>Will this guarantee I make money on seasonal contracts?</summary><p>No. It shows how a price would have performed in past winters. Future winters can be lighter or heavier than anything on record. It's a planning input, not a forecast or financial advice.</p></details>
+  <details><summary>Which areas are covered?</summary><p>1,445 NOAA stations in 43 states with at least 24 complete winters of snowfall records and a median of 5"+ per winter. Coverage is strongest in the Midwest, Northeast, Great Lakes, Plains and Mountain West. Try the demo or the free table first.</p></details>
+  <details><summary>Is this a subscription?</summary><p>No. It's a one-time purchase of the 2026–27 edition. A refreshed edition with the 2026-27 winter added may be offered next season. You're never auto-billed.</p></details>
+  <details><summary>What if it isn't useful for me?</summary><p>Email pnsgloballlc@gmail.com within 14 days of purchase for a full refund. No questions asked.</p></details>
+  <details><summary>Do you write my contract?</summary><p>No. The tool helps you choose numbers (triggers, caps, overage). Have your agreement reviewed by a qualified professional.</p></details>
+</div></section>
+
+<footer><div class="wrap">
+  <p>Data: NOAA National Centers for Environmental Information, Global Historical Climatology Network – Daily (public domain), via the NOAA Open Data Dissemination program; ZIP centroids from the U.S. Census Bureau 2024 Gazetteer. Not affiliated with or endorsed by NOAA. Historical observations are not a forecast. Results depend on your inputs. Nothing here is legal, insurance or financial advice.</p>
+  <p><a href="snow/index.html">Snowstorms per winter by city</a> · <a href="free-storm-table.html">Free 12-metro storm table</a></p>
+  <p><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms &amp; refunds</a> · Contact: <a href="mailto:pnsgloballlc@gmail.com">pnsgloballlc@gmail.com</a> · © 2026</p>
+</div></footer>
+</body>
+</html>
