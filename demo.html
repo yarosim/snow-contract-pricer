@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Seasonal Snow Contract Pricer — 30 winters of local snow events</title>
+<style>
+:root{--ink:#0f172a;--mut:#475569;--line:#e2e8f0;--acc:#0b63ce;--bad:#b91c1c;--good:#15803d;--bg:#f8fafc}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:#0b1b33;color:#fff;padding:18px 22px}header h1{margin:0;font-size:20px}header p{margin:4px 0 0;color:#cbd5e1;font-size:13px}
+main{max-width:1150px;margin:0 auto;padding:18px;display:grid;grid-template-columns:360px 1fr;gap:18px}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+.card h2{font-size:15px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
+label{display:block;font-size:13px;font-weight:600;margin:10px 0 3px}
+input,select{width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;background:#fff}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:12px;color:var(--mut);margin-top:3px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right}th:first-child,td:first-child{text-align:left}
+th{background:#f1f5f9;font-weight:600}
+.big{font-size:28px;font-weight:700}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{border:1px solid var(--line);border-radius:8px;padding:10px}.kpi .l{font-size:12px;color:var(--mut)}.kpi .v{font-size:20px;font-weight:700}
+.bad{color:var(--bad)}.good{color:var(--good)}
+.btn{display:inline-block;background:var(--acc);color:#fff;border:0;border-radius:6px;padding:9px 14px;font-weight:600;cursor:pointer;font-size:14px}
+.btn.alt{background:#fff;color:var(--acc);border:1px solid var(--acc)}
+.warn{background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px;font-size:12.5px;color:#7c2d12}
+svg text{font-size:10px;fill:#475569}
+#nearList button{display:block;width:100%;text-align:left;margin:4px 0;padding:6px 8px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-size:13px}
+#nearList button:hover{border-color:var(--acc)}
+.print-only{display:none}
+@media print{header,.no-print,#controls{display:none!important}main{display:block}.card{border:none;padding:0}.print-only{display:block}body{background:#fff}}
+</style>
+</head>
+<body>
+<header>
+  <h1>❄ Seasonal Snow Contract Pricer <span id="edition" style="font-weight:400;font-size:13px;color:#93c5fd"></span></h1>
+  <p>Price seasonal snow contracts from real local history: snow events per winter at your trigger depth, 1996-97 through 2025-26, from NOAA GHCN-Daily station records.</p>
+</header>
+<main>
+<section id="controls">
+  <div class="card">
+    <h2>1 · Pick your weather station</h2>
+    <div class="warn" style="margin-bottom:8px">Free demo: 12 metro stations. The full Season Pass covers 1,445 NOAA stations in 43 states with ZIP-code lookup, plus the spreadsheet edition.</div><label for="zip">US ZIP code (full edition only)</label>
+    <div class="row" style="grid-template-columns:1fr auto"><input id="zip" inputmode="numeric" maxlength="5" placeholder="e.g. 60601"><button class="btn" id="zipBtn" type="button">Find</button></div>
+    <div id="nearList"></div>
+    <label for="state">…or browse by state</label>
+    <select id="state"></select>
+    <label for="station">Station</label>
+    <select id="station"></select>
+    <div class="hint" id="stationInfo"></div>
+  </div>
+  <div class="card">
+    <h2>2 · Contract terms</h2>
+    <div class="row">
+      <div><label for="trigger">Trigger depth (in)</label>
+      <select id="trigger"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>6</option></select></div>
+      <div><label for="repush">Extra push every (in)</label>
+      <input id="repush" type="number" min="0" step="1" value="6"><div class="hint">Beyond trigger, per storm. 0 = one push per storm.</div></div>
+    </div>
+    <div class="row">
+      <div><label for="costPush">Your cost per push ($)</label><input id="costPush" type="number" min="0" step="5" value="150"><div class="hint">Labor + equipment + fuel + overhead for this property, one visit.</div></div>
+      <div><label for="pricePush">Your per-push price ($)</label><input id="pricePush" type="number" min="0" step="5" value="225"><div class="hint">Used for overage + per-push comparison.</div></div>
+    </div>
+    <label><input id="saltOn" type="checkbox" checked style="width:auto"> Include salting / de-icing</label>
+    <div class="row">
+      <div><label for="costSalt">Cost per salt application ($)</label><input id="costSalt" type="number" min="0" step="5" value="60"></div>
+      <div><label for="saltRule">Salt applications per season</label>
+      <select id="saltRule"><option value="light" selected>Every snow day ≥ 0.1 in</option><option value="push">Once per push</option></select></div>
+    </div>
+    <div class="row">
+      <div><label for="margin">Target margin (%)</label><input id="margin" type="number" min="0" max="80" step="1" value="25"></div>
+      <div><label for="pct">Plan for a winter at…</label>
+      <select id="pct"><option value="50">Median (50th pct)</option><option value="70">70th percentile</option><option value="80" selected>80th percentile</option><option value="90">90th percentile</option></select></div>
+    </div>
+    <div class="row">
+      <div><label for="months">Billing months</label><input id="months" type="number" min="1" max="12" value="5"></div>
+      <div><label for="lastN">Winters to use</label>
+      <select id="lastN"><option value="30" selected>All available (up to 30)</option><option value="15">Last 15</option><option value="10">Last 10</option></select></div>
+    </div>
+  </div>
+</section>
+<section>
+  <div class="print-only" id="printHead"></div>
+  <div class="card">
+    <h2>Recommended seasonal price</h2>
+    <div class="kpis">
+      <div class="kpi"><div class="l">Seasonal price</div><div class="v" id="kSeason">—</div></div>
+      <div class="kpi"><div class="l">Per month</div><div class="v" id="kMonth">—</div></div>
+      <div class="kpi"><div class="l">Winters it would have lost money</div><div class="v" id="kLoss">—</div></div>
+      <div class="kpi"><div class="l">Worst-winter result</div><div class="v" id="kWorst">—</div></div>
+    </div>
+    <p class="hint" id="kExplain"></p>
+    <div class="no-print" style="margin-top:8px"><button class="btn alt" type="button" onclick="window.print()">Print / save client report (PDF)</button>
+    <button class="btn alt" type="button" id="csvBtn">Download season table (CSV)</button></div>
+  </div>
+  <div class="card">
+    <h2>Pushes per winter at this trigger</h2>
+    <div id="chart"></div>
+  </div>
+  <div class="card">
+    <h2>Distribution</h2>
+    <table id="dist"></table>
+  </div>
+  <div class="card">
+    <h2>Hybrid option (seasonal with a push cap)</h2>
+    <p id="hybrid" style="margin:0"></p>
+  </div>
+  <div class="card">
+    <h2>Winter-by-winter backtest</h2>
+    <div style="max-height:420px;overflow:auto"><table id="bt"></table></div>
+  </div>
+  <div class="warn">
+    <b>Read this before you quote.</b> Figures are historical observations from one NOAA GHCN-Daily station and are not a forecast or a guarantee of future snowfall, profit, or contract outcomes. A "storm event" here is consecutive days with ≥0.1 in of new snow, summed; daily snowfall is measured once per day, so timing of storms can split or merge events. Ice, freezing rain, drifting and refreeze are not captured. Stations can be miles from a property and snowfall varies locally (lake effect, elevation). Missing days are treated as no snow; seasons with less than 90% of Nov–Mar days reported are excluded. Use this as one input alongside your own site visit, costs and judgment. Not legal, insurance or financial advice.
+  </div>
+  <p class="hint">Data: NOAA NCEI Global Historical Climatology Network – Daily (GHCN-D), public domain, accessed via the NOAA Open Data Dissemination program (noaa-ghcn-pds). ZIP centroids: US Census Bureau 2024 Gazetteer (ZCTA). Processed <span id="built"></span>.</p>
+</section>
+</main>
+<script src="demo_data.js"></script>
+<script>window.ZIPS=null;</script>
+<script>
+const D=window.SNOW_DATA||{stations:[]};const S=D.stations;
+document.getElementById('edition').textContent=D.edition||'';document.getElementById('built').textContent=D.built||'';
+const $=id=>document.getElementById(id);const fmt=n=>'$'+Math.round(n).toLocaleString();
+const states=[...new Set(S.map(s=>s.st))].sort();
+$('state').innerHTML=states.map(s=>`<option>${s}</option>`).join('');
+function fillStations(st,sel){const list=S.map((s,i)=>[s,i]).filter(([s])=>s.st===st);
+ $('station').innerHTML=list.map(([s,i])=>`<option value="${i}">${s.n} (${s.id}) — median ${s.med}" /yr</option>`).join('');if(sel!=null)$('station').value=sel;calc();}
+$('state').onchange=()=>fillStations($('state').value);
+function hav(a,b,c,d){const R=3958.8,r=Math.PI/180;const x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
+$('zipBtn').onclick=()=>{const z=$('zip').value.trim();const nl=$('nearList');
+ if(!window.ZIPS){nl.innerHTML='<p class="hint">ZIP lookup data not loaded in this edition — browse by state.</p>';return;}
+ const p=ZIPS[z];if(!p){nl.innerHTML='<p class="hint">ZIP not found (or outside coverage). Try a neighboring ZIP or browse by state.</p>';return;}
+ const near=S.map((s,i)=>[hav(p[0],p[1],s.la,s.lo),i]).sort((a,b)=>a[0]-b[0]).slice(0,5);
+ nl.innerHTML='<div class="hint">Nearest stations (straight-line miles). Prefer similar elevation and lake/terrain exposure:</div>'+near.map(([d,i])=>`<button type="button" data-i="${i}">${S[i].n}, ${S[i].st} — ${d.toFixed(1)} mi · elev ${Math.round(S[i].el*3.281)} ft · median ${S[i].med}"</button>`).join('');
+ nl.querySelectorAll('button').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;$('state').value=S[i].st;fillStations(S[i].st,i);});};
+function pctl(arr,p){const a=[...arr].sort((x,y)=>x-y);if(!a.length)return 0;const k=(a.length-1)*p/100,f=Math.floor(k),c=Math.ceil(k);return f===c?a[f]:a[f]+(a[c]-a[f])*(k-f);}
+function pushesFor(ev,trig,rep){let n=0;for(const e of ev){if(e>=trig){n+=1;if(rep>0)n+=Math.floor((e-trig)/rep);}}return n;}
+let lastRows=[];
+function calc(){
+ const i=+$('station').value;const s=S[i];if(!s)return;
+ const trig=+$('trigger').value,rep=+$('repush').value||0,cp=+$('costPush').value||0,pp=+$('pricePush').value||0,
+ saltOn=$('saltOn').checked,cs=+$('costSalt').value||0,rule=$('saltRule').value,m=Math.min(80,Math.max(0,+$('margin').value||0))/100,
+ P=+$('pct').value,months=Math.max(1,+$('months').value||1),lastN=+$('lastN').value;
+ let seasons=s.S.slice(-lastN);
+ $('stationInfo').innerHTML=`${s.n}, ${s.st} · ${s.id} · ${s.la.toFixed(3)}, ${s.lo.toFixed(3)} · elev ${Math.round(s.el*3.281)} ft · ${s.S.length} complete winters on record (${s.S[0][0]}-${String(s.S[0][0]+1).slice(2)} to ${s.S.at(-1)[0]}-${String(s.S.at(-1)[0]+1).slice(2)})`;
+ const rows=seasons.map(([yr,tot,light,ev])=>{const pushes=pushesFor(ev,trig,rep);const storms=ev.filter(e=>e>=trig).length;
+   const salts=saltOn?(rule==='light'?light:pushes):0;const cost=pushes*cp+salts*cs;return {yr,tot,light,storms,pushes,salts,cost};});
+ const pushArr=rows.map(r=>r.pushes),saltArr=rows.map(r=>r.salts),costArr=rows.map(r=>r.cost);
+ const planCost=pctl(costArr,P);const price=planCost/(1-m);
+ rows.forEach(r=>{r.profit=price-r.cost;r.perPushRev=r.pushes*pp+(saltOn?r.salts*cs/(1-m):0);});
+ const losses=rows.filter(r=>r.profit<0).length;const worst=Math.min(...rows.map(r=>r.profit));
+ $('kSeason').textContent=fmt(price);$('kMonth').textContent=fmt(price/months);
+ $('kLoss').innerHTML=`<span class="${losses?'bad':'good'}">${losses} of ${rows.length}</span>`;
+ $('kWorst').innerHTML=`<span class="${worst<0?'bad':'good'}">${worst<0?'−':''}${fmt(Math.abs(worst))}</span>`;
+ $('kExplain').textContent=`Priced to cover your cost in a ${P}th-percentile winter (${fmt(planCost)} of cost: about ${pctl(pushArr,P).toFixed(1)} pushes${saltOn?` and ${pctl(saltArr,P).toFixed(1)} salt applications`:''}) plus a ${Math.round(m*100)}% margin. Average winter profit at this price: ${fmt(rows.reduce((a,r)=>a+r.profit,0)/rows.length)}.`;
+ const stat=(arr)=>[Math.min(...arr),pctl(arr,50),arr.reduce((a,b)=>a+b,0)/arr.length,pctl(arr,80),pctl(arr,90),Math.max(...arr)];
+ const f1=v=>(Math.round(v*10)/10).toString();
+ const lines=[['Seasonal snowfall (in)',stat(rows.map(r=>r.tot))],[`Storms ≥ ${trig}"`,stat(rows.map(r=>r.storms))],['Pushes (incl. re-pushes)',stat(pushArr)]];
+ if(saltOn)lines.push(['Salt applications',stat(saltArr)]);lines.push(['Your season cost ($)',stat(costArr)]);
+ $('dist').innerHTML='<tr><th></th><th>Min</th><th>Median</th><th>Mean</th><th>80th</th><th>90th</th><th>Max</th></tr>'+lines.map(([l,v])=>`<tr><td>${l}</td>${v.map(x=>`<td>${l.includes('$')?fmt(x):f1(x)}</td>`).join('')}</tr>`).join('');
+ const cap=Math.ceil(pctl(pushArr,50));const saltCap=Math.ceil(pctl(saltArr,50));const capPrice=(cap*cp+(saltOn?saltCap*cs:0))/(1-m);
+ const over=rows.filter(r=>r.pushes>cap);const avgOver=over.length?over.reduce((a,r)=>a+(r.pushes-cap),0)/over.length:0;
+ $('hybrid').innerHTML=`Seasonal fee of <b>${fmt(capPrice)}</b> (${fmt(capPrice/months)}/mo) covering up to <b>${cap} pushes</b>${saltOn?` and ${saltCap} salt applications`:''} — the median winter — then <b>${fmt(pp)}</b> per additional push${saltOn?` and ${fmt(cs/(1-m))} per additional salt application`:''}. In this history, pushes exceeded ${cap} in <b>${over.length} of ${rows.length}</b> winters (by ${avgOver.toFixed(1)} pushes on average when they did). A lower headline price for the client; heavy-winter risk is shared through overage billing. State caps and overage terms clearly in your agreement.`;
+ $('bt').innerHTML='<tr><th>Winter</th><th>Snow (in)</th><th>Storms ≥ trig</th><th>Pushes</th>'+(saltOn?'<th>Salts</th>':'')+'<th>Your cost</th><th>Seasonal profit</th><th>If billed per push</th></tr>'+
+  rows.slice().reverse().map(r=>`<tr><td>${r.yr}-${String(r.yr+1).slice(2)}</td><td>${r.tot}</td><td>${r.storms}</td><td>${r.pushes}</td>${saltOn?`<td>${r.salts}</td>`:''}<td>${fmt(r.cost)}</td><td class="${r.profit<0?'bad':'good'}">${r.profit<0?'−':''}${fmt(Math.abs(r.profit))}</td><td>${fmt(r.perPushRev)}</td></tr>`).join('');
+ drawChart(rows,pctl(pushArr,P));lastRows=rows.map(r=>({...r,station:s.id}));
+ $('printHead').innerHTML=`<h2 style="margin:0">Snow history summary — ${s.n}, ${s.st} (NOAA station ${s.id})</h2><p class="hint">Trigger ${trig}" · ${rows.length} winters · prepared with the Seasonal Snow Contract Pricer</p>`;
+}
+function drawChart(rows,plan){const W=720,H=220,p=28,n=rows.length,max=Math.max(1,...rows.map(r=>r.pushes),plan);const bw=(W-p-8)/n;
+ let g=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Pushes per winter">`;
+ for(let k=0;k<=4;k++){const y=H-p-(H-p-10)*k/4;g+=`<line x1="${p}" x2="${W}" y1="${y}" y2="${y}" stroke="#eef2f7"/><text x="2" y="${y+3}">${Math.round(max*k/4)}</text>`;}
+ rows.forEach((r,i)=>{const h=(H-p-10)*r.pushes/max;const x=p+i*bw+1;g+=`<rect x="${x}" y="${H-p-h}" width="${bw-2}" height="${h}" fill="${r.pushes>plan?'#f97316':'#0b63ce'}"><title>${r.yr}-${r.yr+1}: ${r.pushes} pushes</title></rect>`;
+  if(i%Math.ceil(n/10)===0)g+=`<text x="${x}" y="${H-p+12}">${String(r.yr).slice(2)}-${String(r.yr+1).slice(2)}</text>`;});
+ const y=H-p-(H-p-10)*plan/max;g+=`<line x1="${p}" x2="${W}" y1="${y}" y2="${y}" stroke="#b91c1c" stroke-dasharray="4 3"/><text x="${W-150}" y="${y-4}" style="fill:#b91c1c">planning level ${plan.toFixed(1)}</text></svg>`;
+ g+='<div class="hint">Orange bars = winters above your planning level (where a flat seasonal price absorbs the extra cost).</div>';$('chart').innerHTML=g;}
+$('csvBtn').onclick=()=>{if(!lastRows.length)return;const k=Object.keys(lastRows[0]);const csv=[k.join(',')].concat(lastRows.map(r=>k.map(x=>r[x]).join(','))).join('\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='snow_contract_backtest.csv';a.click();};
+['trigger','repush','costPush','pricePush','saltOn','costSalt','saltRule','margin','pct','months','lastN','station'].forEach(id=>$(id).addEventListener('input',calc));
+const defSt=states.includes(D.defaultState)?D.defaultState:states[0];$('state').value=defSt;
+const defIdx=S.findIndex(s=>s.id===D.defaultStation);fillStations(defSt,defIdx>=0&&S[defIdx].st===defSt?defIdx:null);
+</script>
+</body>
+</html>
