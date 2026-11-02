@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://formsubmit.co; form-action 'self' https://formsubmit.co https://buy.stripe.com; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com; base-uri 'self'; object-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Seasonal Snow Contract Pricer: price snow contracts on 30 winters of local storm data</title>
 <meta name="description" content="Enter a ZIP, trigger depth and your cost per push. See pushes per winter since 1996-97 from NOAA station data, a seasonal price for an 80th-percentile winter, and how many winters it would have lost money.">
@@ -16,7 +19,7 @@
 .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
 .hero{background:linear-gradient(180deg,#0b1b33,#12325e);color:#fff;padding:64px 0 48px}
 .hero h1{font-size:40px;line-height:1.15;margin:0 0 14px;max-width:820px}.hero p{font-size:18px;color:#dbeafe;max-width:760px}
-.cta{display:inline-block;background:#f97316;color:#fff;font-weight:700;padding:14px 22px;border-radius:8px;text-decoration:none;margin:8px 10px 0 0}
+.cta{display:inline-block;background:#c2410c;color:#fff;font-weight:700;padding:14px 22px;border-radius:8px;text-decoration:none;margin:8px 10px 0 0}
 .cta.alt{background:transparent;border:2px solid #93c5fd;color:#fff}
 section{padding:48px 0;border-bottom:1px solid var(--line)}h2{font-size:28px;margin:0 0 14px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
@@ -109,5 +112,28 @@ ul.check{list-style:none;padding:0}ul.check li:before{content:"✔ ";color:#1580
   <p><a href="snow/index.html">Snowstorms per winter by city</a> · <a href="free-storm-table.html">Free 12-metro storm table</a></p>
   <p><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms &amp; refunds</a> · Contact: <a href="mailto:pnsgloballlc@gmail.com">pnsgloballlc@gmail.com</a> · © 2026</p>
 </div></footer>
+
+<!-- free-hook: email capture -> /free/ -->
+<section id="free-hook" style="max-width:720px;margin:2rem auto;padding:1.25rem;border:2px solid #2b6cb0;border-radius:10px">
+<h2 style="margin-top:0">Free: 12-metro storm table + pricing worksheet</h2>
+<p>Get the free storm table link by email and a reminder before the season starts.</p>
+<form action="https://formsubmit.co/pnsgloballlc@gmail.com" method="POST">
+<input type="hidden" name="_subject" value="[SIGNUP] snow-contract-pricer">
+<input type="hidden" name="_next" value="https://yarosim.github.io/snow-contract-pricer/free/">
+<input type="hidden" name="_template" value="table">
+<input type="hidden" name="source" value="snow-contract-pricer">
+<input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
+<label>Email <input type="email" name="email" required autocomplete="email"></label>
+<button type="submit">Email me the free table</button>
+</form>
+<p style="font-size:.85em">We use your email only to send this and occasional updates about this product. Unsubscribe any time by replying "stop".</p>
+</section>
+
+<!-- ux-forms v1 -->
+<section id="feedback" aria-label="Signup and feedback" style="max-width:960px;margin:32px auto;padding:20px;border-top:1px solid #8884;font:16px/1.5 system-ui,sans-serif">
+<form class="ux-feedback" action="https://formsubmit.co/pnsgloballlc@gmail.com" method="POST" aria-label="Feedback" style="margin-top:16px">
+<input type="hidden" name="_subject" value="[FEEDBACK] snow-contract-pricer"><input type="hidden" name="_captcha" value="false"><input type="hidden" name="_template" value="table"><input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off"><input type="hidden" name="_next" value="https://yarosim.github.io/snow-contract-pricer/?feedback=thanks">
+<label for="ux-fb-msg"><strong>Feedback?</strong> Tell us what would make this more useful.</label><br><textarea id="ux-fb-msg" name="message" required rows="3" style="width:100%;max-width:560px;padding:10px;border:1px solid #555;border-radius:6px"></textarea><br><label for="ux-fb-email">Email (optional)</label> <input id="ux-fb-email" type="email" name="email" style="padding:8px;border:1px solid #555;border-radius:6px"> <button type="submit" style="padding:10px 16px;border:0;border-radius:6px;background:#1a56db;color:#fff;font-weight:700;cursor:pointer">Send feedback</button></form>
+</section>
 </body>
 </html>
